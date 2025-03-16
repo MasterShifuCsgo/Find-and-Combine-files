@@ -40,7 +40,7 @@ namespace fs = std::filesystem;
 
         // check if the file is the merged file itself.
         if (Entity.path().filename().string() == OutputFileName) {
-          break;
+          continue;
         }
 
         //cut out symlink files
