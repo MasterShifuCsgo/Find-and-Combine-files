@@ -15,17 +15,17 @@ namespace fs = std::filesystem;
 
 constexpr const char* Program_Output("root"); //folder
 constexpr const char* extension(".md");
-std::string fileName("merged");
-
+constexpr const char* fileName("merged");
+const std::string OutputFileName = std::string(fileName) + extension;
 
 int main()
 {
   //create the root path
   fs::create_directory(Program_Output);
-  fs::path rootFolder{ fs::current_path() / Program_Output };
+  fs::path OutputPath{ fs::current_path() / Program_Output / OutputFileName };
 
   //merge.txt | append mode
-  std::ofstream output(rootFolder / fileName.append(extension), std::ios::app);
+  std::ofstream output(OutputPath, std::ios::app);
 
   //directorys found
   std::vector<fs::path> seenDirectories{fs::current_path()};
@@ -34,11 +34,12 @@ int main()
   while (!seenDirectories.empty()) {
     fs::path currentFolder = seenDirectories.back();
     seenDirectories.pop_back();
+    std::cout << "Directory Changed: " << currentFolder.string() << '\n';
 
     //start looking for files in the directory
     for (const auto& Entity : fs::directory_iterator(currentFolder)) {
     
-      if (Entity.path().filename() == '\"'+fileName + extension+'\"') {
+      if (Entity.path().filename().string() == OutputFileName) {
         break;
       }
 
@@ -51,8 +52,9 @@ int main()
           //open the found .txt file
           std::ifstream target (Entity.path());          
 
-          //append the text from the file into the main text file
-          output << Entity.path().filename() << '\n';          
+          //append the text from the file into the main text file                    
+          std::cout << "File found: " << Entity.path().filename().string() << '\n';
+          output << Entity.path().filename() << '\n';
           std::string line;
           while (std::getline(target, line)) {
             output << line;
