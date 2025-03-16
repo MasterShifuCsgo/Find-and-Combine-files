@@ -57,7 +57,7 @@ namespace fs = std::filesystem;
             output << Entity.path().filename() << '\n';
             std::string line;
             while (std::getline(target, line)) {
-              output << line;
+              output << line << '\n';
             }
             output << "\n\n\n";
             target.close();
