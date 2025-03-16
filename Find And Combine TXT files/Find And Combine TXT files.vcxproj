@@ -129,6 +129,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Find And Combine TXT files.cpp" />
+    <ClCompile Include="Traverser.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Traverser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
