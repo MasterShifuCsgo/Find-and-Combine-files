@@ -70,6 +70,7 @@ namespace fs = std::filesystem;
         }
       }
     }
+    output.flush();
 
     return true;
   }
