@@ -12,7 +12,10 @@
 
 namespace fs = std::filesystem;
 
-
+//logs data to the terminal
+void log(std::string type, std::string msg) {
+    std::cout << type << ": " << msg << "\n";
+}
   Traverser::Traverser() {
     //create the root path
     fs::create_directory(Program_Output);
