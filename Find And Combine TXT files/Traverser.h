@@ -27,6 +27,48 @@ class Traverser {
     ".md"
   };
 
+  std::unordered_set<std::string> acceptedExtensions2{
+    ".txt",   // Plain text file
+    ".md",    // Markdown file
+    ".pdf",   // Portable Document Format
+    ".doc",   // Microsoft Word document
+    ".docx",  // Microsoft Word document (XML-based)
+    ".rtf",   // Rich Text Format
+    ".odt",   // OpenDocument Text Document
+    ".html",  // HTML file
+    ".htm",   // HTML file (alternative extension)
+    ".csv",   // Comma-separated values
+    ".xml",   // XML file
+    ".json",  // JSON file
+    ".yaml",  // YAML file
+    ".yml",   // YAML file (alternative extension)
+    ".epub",  // EPUB eBook file
+    ".mobi",  // MOBI eBook file
+    ".tex",   // LaTeX source file
+    ".rst",   // reStructuredText file
+    ".log",   // Log file
+    ".asc",   // ASCII-armored file (usually GPG, PGP, or plain text)
+
+    // Programming files
+    ".cpp",   // C++ source code file
+    ".h",     // C/C++ header file
+    ".hpp",   // C++ header file (alternative extension)
+    ".c",     // C source code file
+    ".cs",    // C# source code file
+    ".java",  // Java source code file
+    ".js",    // JavaScript file
+    ".py",    // Python source code file
+    ".go",    // Go source code file
+    ".php",   // PHP source code file
+    ".rb",    // Ruby source code file
+    ".swift", // Swift source code file
+    ".rs",    // Rust source code file
+    ".ts",    // TypeScript file
+    ".scala", // Scala source code file
+    ".pl"     // Perl script
+  };
+
+
 public:
   Traverser();
   bool combine();
