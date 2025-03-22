@@ -49,8 +49,9 @@ void log(std::string type, std::string msg) {
         const auto filename = Entity.path().filename().string();
 
         // check if the file is the folder stared
-        if (Entity.path() == startingDir) {
-          continue; // skip that folder
+        
+        if (fs::equivalent(Entity.path(), startingDir)) {
+          continue; // skips that folder
         }
 
         //cut out symlink files
