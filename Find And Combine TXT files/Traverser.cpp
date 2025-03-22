@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 
 //logs data to the terminal
 void log(std::string type, std::string msg) {
-    std::cout << type << ": " << msg << "\n";
+  std::cout << type << ": " << msg << std::endl;
 }
   Traverser::Traverser() {
     //create the root path
@@ -27,9 +27,11 @@ void log(std::string type, std::string msg) {
     //directorys found
     seenDirectories.push_back(fs::current_path());
   }
+  
 
   bool Traverser::combine() {
 
+  //searches and combines files into one speficied file.
     //continues when there are no other directories to be seen
     while (!seenDirectories.empty()) {
       
@@ -78,7 +80,50 @@ void log(std::string type, std::string msg) {
         }
       }
     }
-    output.flush();
+    output.flush(); // get rid of any leftovers
+    
+
+    //ask the user if he wants to split the file into multiple parts if the merged file is too big.
+    auto merged_file_size = fs::file_size(OutputPath);
+    if (merged_file_size >= maximum_file_length) {
+      char user_choise = 'N'; // default is no.
+      std::cout << "\n\n------------CAUTION!------------" << std::endl;
+      std::cout << "Merged file is more than maximum file length:" << maximum_file_length << std::endl;
+      std::cout << "Would you like to seperate the file into chucks of " << maximum_file_length << "?" << std::endl;
+            
+      while(true){
+        std::cout << "\'Y\' or \'N\': " << std::flush;
+        std::cin >> user_choise;
+        // if user choise is not a char
+        if (std::cin.fail()) {
+          std::cin.clear();
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          std::cout << "Please Enter a valid choice \'Y\' or \'N\'\n";
+          continue;
+        }
+        //user choise is not a valid choice
+        else if (user_choise != 'Y' && user_choise != 'N') {
+          std::cout << "Please enter a \'Y\' or \'N\'\n";
+          continue;
+        }
+        //clear the input buffer just incase the user inputed "Yawdw". awdw would stay in the input buffer.
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        break;
+      }
+
+      //if user choise is 'N'
+      //skip because it will evaluate to true anyways.
+
+      //if user choice is 'Y'
+      if (user_choise == 'Y') {
+
+
+
+
+
+
+      }     
+    }
 
     return true;
   }

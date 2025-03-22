@@ -6,12 +6,14 @@
 #include <unordered_set>
 #include <iostream>
 #include <fstream>
+#include <cstdint>
 
 namespace fs = std::filesystem;
 
 constexpr const char* Program_Output("root"); //folder
 constexpr const char* extension(".txt");
 constexpr const char* fileName("merged");
+constexpr const uint32_t maximum_file_length = 500'000;
 
 class Traverser {
 
