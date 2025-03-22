@@ -17,15 +17,13 @@ int main()
 {
   
   Traverser tr;
-
   if (tr.combine()) {
-    std::cout << "Complete";
+    std::cout << "\n\nFinished\n\n" << std::endl;
   }
 
-
-
-
   
+
+
   _getch();
 
   return 0;
