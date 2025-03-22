@@ -22,12 +22,12 @@ class Traverser {
   std::ofstream output;
   std::vector<fs::path> seenDirectories;
   
-  std::unordered_set<std::string> acceptedExtensions{
+  std::unordered_set<std::string> acceptedExtensions2{
     ".txt",
     ".md"
   };
 
-  std::unordered_set<std::string> acceptedExtensions2{
+  std::unordered_set<std::string> acceptedExtensions{
     ".txt",   // Plain text file
     ".md",    // Markdown file
     ".pdf",   // Portable Document Format

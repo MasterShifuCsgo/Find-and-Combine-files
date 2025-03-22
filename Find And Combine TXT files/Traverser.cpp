@@ -38,26 +38,31 @@ void log(std::string type, std::string msg) {
       seenDirectories.pop_back();
       std::cout << "Directory Changed: " << currentFolder.string().substr(startingPath.string().size()) << '\n';
 
+      fs::path startingDir = (startingPath / Program_Output);
+
       //start looking for files in the directory
       for (const auto& Entity : fs::directory_iterator(currentFolder)) {
 
-        // check if the file is the merged file itself.
-        if (Entity.path().filename().string() == OutputFileName) {
-          continue;
+        const auto path = Entity.path();
+        const auto filename = Entity.path().filename().string();
+
+        // check if the file is the folder stared
+        if (Entity.path() == startingDir) {
+          continue; // skip that folder
         }
 
         //cut out symlink files
-        if (fs::is_regular_file(Entity.path())) {
+        if (fs::is_regular_file(path)) {
 
           //if current file has accepted extension, append the contents to the merged.txt file
-          if (acceptedExtensions.contains(Entity.path().extension().string())) {
+          if (acceptedExtensions.contains(path.extension().string())) {
 
             //open the found .txt file
-            std::ifstream target(Entity.path());
+            std::ifstream target(path);
 
             //append the text from the file into the main text file                    
-            std::cout << "File found: " << Entity.path().filename().string() << '\n';
-            output << Entity.path().filename() << '\n';
+            std::cout << "File found: " << filename << '\n';
+            output << '\'' << filename << '\'' << '\n';
             std::string line;
             while (std::getline(target, line)) {
               output << line << '\n';
