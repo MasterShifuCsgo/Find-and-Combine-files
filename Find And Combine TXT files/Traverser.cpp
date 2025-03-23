@@ -1,5 +1,10 @@
 #pragma once
 
+//share code between compilers
+#if defined(_DEBUG) || defined(DEBUG)
+#define IS_DEBUG_BUILD
+#endif
+
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -9,13 +14,17 @@
 #include <fstream>
 #include "Traverser.h"
 
-
 namespace fs = std::filesystem;
 
 //logs data to the terminal
-void log(std::string type, std::string msg) {
-    std::cout << type << ": " << msg << "\n";
+#ifdef IS_DEBUG_BUILD
+static void msgTerminal(std::string type, std::string msg) {
+  std::cout << type << ": " << msg << '\n';
 }
+#else
+inline void msgTerminal(std::string, std::string) {}
+#endif
+
   Traverser::Traverser() {
     //create the root path
     fs::create_directory(Program_Output);
@@ -36,8 +45,7 @@ void log(std::string type, std::string msg) {
       //change directory
       fs::path currentFolder = seenDirectories.back();
       seenDirectories.pop_back();
-      std::cout << "Directory Changed: " << currentFolder.string().substr(startingPath.string().size()) << '\n';
-
+      msgTerminal("LOG:", "Directory Changed: " + currentFolder.string().substr(startingPath.string().size()));
       fs::path startingDir = (startingPath / Program_Output);
 
       //start looking for files in the directory
@@ -61,7 +69,9 @@ void log(std::string type, std::string msg) {
             std::ifstream target(path);
 
             //append the text from the file into the main text file                    
-            std::cout << "File found: " << filename << '\n';
+            
+            msgTerminal("LOG: ", "File found: " + filename);
+
             output << '\'' << filename << '\'' << '\n';
             std::string line;
             while (std::getline(target, line)) {
