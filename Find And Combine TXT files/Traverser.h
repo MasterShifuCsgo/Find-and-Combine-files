@@ -74,6 +74,7 @@ class Traverser {
 public:
   Traverser();
   bool combine();
+  bool split();
 
 };
 
