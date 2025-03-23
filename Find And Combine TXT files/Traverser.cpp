@@ -7,15 +7,12 @@
 #include <unordered_set>
 #include <iostream>
 #include <fstream>
+#include <cstdint> 
 #include "Traverser.h"
 
 
 namespace fs = std::filesystem;
 
-//logs data to the terminal
-void log(std::string type, std::string msg) {
-  std::cout << type << ": " << msg << std::endl;
-}
   Traverser::Traverser() {
     //create the root path
     fs::create_directory(Program_Output);
@@ -23,15 +20,13 @@ void log(std::string type, std::string msg) {
     startingPath = fs::current_path();
     OutputPath = startingPath / Program_Output / OutputFileName;
     //merge.txt | append mode
-    output.open(OutputPath, std::ios::app);
-    //directorys found
+    
+    //starting directory
     seenDirectories.push_back(fs::current_path());
   }
   
   //Splits the merged file into chunks, each of size maximum_file_size
   bool Traverser::split() {
-
-
     //if the merged file is too big, check if the user wants to split it.
     auto merged_file_size = fs::file_size(OutputPath);
     if (merged_file_size >= maximum_file_length) {
@@ -73,14 +68,14 @@ void log(std::string type, std::string msg) {
 
 
       }
-      
     }
     return true;
   }
 
 
   bool Traverser::combine() {
-
+    //open the created file.
+    output.open(OutputPath, std::ios::app);
     //searches and combines files into one speficied file.
     //continues when there are no other directories to be seen
     while (!seenDirectories.empty()) {
@@ -88,7 +83,7 @@ void log(std::string type, std::string msg) {
       //change directory
       fs::path currentFolder = seenDirectories.back();
       seenDirectories.pop_back();
-      std::cout << "Directory Changed: " << currentFolder.string().substr(startingPath.string().size()) << '\n';
+      
 
       fs::path startingDir = (startingPath / Program_Output);
 
@@ -113,14 +108,16 @@ void log(std::string type, std::string msg) {
             //open the found .txt file
             std::ifstream target(path);
 
-            //append the text from the file into the main text file                    
-            std::cout << "File found: " << filename << '\n';
+            //append the text from the file into the main text file
             output << '\'' << filename << '\'' << '\n';
+            std::uint64_t line_number = 10'000'000'000ULL;
             std::string line;
             while (std::getline(target, line)) {
+              ++line_number;
               output << line << '\n';
             }
             output << "\n\n\n";
+            line_number += 3;
             target.close();
           }
         }
@@ -131,8 +128,8 @@ void log(std::string type, std::string msg) {
         }
       }
     }
-    output.flush(); // get rid of any leftovers
-    output.close(); // close file
+    output.flush(); // get rid of any leftovers in buffer
+    output.close(); 
     split(); // ask the user if the wants to split the file if the file is too big. size is determined by variable 'maximum_file_length'
     return true;
   }
