@@ -9,7 +9,7 @@
 #include <fstream>
 #include <cstdint> 
 #include "Traverser.h"
-
+#include "GlobalFunctions.h"
 
 namespace fs = std::filesystem;
 
@@ -35,26 +35,19 @@ namespace fs = std::filesystem;
       std::cout << "Merged file is more than maximum file length: " << maximum_file_length << std::endl;
       std::cout << "Would you like to seperate the file into chucks of " << maximum_file_length << "?" << std::endl;
 
-      //ask the user if he wants to split the file into multiple parts
-      while (true) {
-        std::cout << "\'Y\' or \'N\': " << std::flush;
-        std::cin >> user_choise;
-        // if user choise is not a char
-        if (std::cin.fail()) {
-          std::cin.clear(); 
-          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
-          std::cout << "Please Enter a valid choice \'Y\' or \'N\'\n";
-          continue;
+      //ask the user if he wants to split the file into multiple parts  
+        while (true) {
+          if (!GlobalFunctions::readUserInput(user_choise, std::string("Please enter a char"))) {
+            std::cout << "\'Y\' or \'N\': " << std::flush;
+            continue;
+          }          
+          if (!GlobalFunctions::isValidChoice(user_choise, { 'Y', 'N' }, std::string("Please enter the right choice"))){
+            std::cout << "\'Y\' or \'N\': " << std::flush;
+            continue;
+          }
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          break; // all tests passed.
         }
-        //user choise is not a valid choice
-        else if (user_choise != 'Y' && user_choise != 'N') {
-          std::cout << "Please enter \'Y\' or \'N\'\n";
-          continue;
-        }
-        //clear the input buffer just incase the user inserted "Yawdw". awdw would stay in the input buffer.
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        break;
-      }
 
       //if user choise is 'N'
       //skip because it will evaluate to true anyways.
