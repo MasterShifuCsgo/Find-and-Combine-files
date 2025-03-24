@@ -26,7 +26,7 @@ namespace fs = std::filesystem;
   }
   
   //Splits the merged file into chunks, each of size maximum_file_size
-  bool Traverser::split() {
+  bool Traverser::split(std::vector<std::vector<std::uint64_t>>& file_ranges) {
     //if the merged file is too big, check if the user wants to split it.
     auto merged_file_size = fs::file_size(OutputPath);
     if (merged_file_size >= maximum_file_length) {
@@ -67,6 +67,9 @@ namespace fs = std::filesystem;
 
 
   bool Traverser::combine() {
+
+    std::vector<std::vector<std::uint64_t>> files_ranges{}; // hold the start and end positions of each file that is appended to the merge.
+    std::uint64_t line_number = 0ULL; // holds the line number in the append file
     //open the created file.
     output.open(OutputPath, std::ios::app);
     //searches and combines files into one speficied file.
@@ -100,17 +103,21 @@ namespace fs = std::filesystem;
 
             //open the found .txt file
             std::ifstream target(path);
+            
+            
+            files_ranges.push_back({ line_number }); // creates a new instance in the vector where 1 file begins.
+            output << '\'' << filename << '\'' << '\n';            
+            std::string line;
 
             //append the text from the file into the main text file
-            output << '\'' << filename << '\'' << '\n';
-            std::uint64_t line_number = 10'000'000'000ULL;
-            std::string line;
             while (std::getline(target, line)) {
-              ++line_number;
+              ++line_number; // lines from files
               output << line << '\n';
             }
-            output << "\n\n\n";
-            line_number += 3;
+
+            output << "\n";
+            line_number++; // last '\n'
+            files_ranges.push_back(files_ranges[files_ranges.size()-1]); // adds the file end to the latest file position added.
             target.close();
           }
         }
@@ -123,7 +130,7 @@ namespace fs = std::filesystem;
     }
     output.flush(); // get rid of any leftovers in buffer
     output.close(); 
-    split(); // ask the user if the wants to split the file if the file is too big. size is determined by variable 'maximum_file_length'
+    split(files_ranges); // ask the user if the wants to split the file if the file is too big. size is determined by variable 'maximum_file_length'
     return true;
   }
     
