@@ -90,8 +90,7 @@ namespace fs = std::filesystem;
 
       //start looking for files in the directory
       for (const auto& Entity : fs::directory_iterator(currentFolder)) {
-
-        const auto path = Entity.path();
+       
         const auto filename = Entity.path().filename().string();
 
         // check if the file is the folder stared
@@ -101,13 +100,13 @@ namespace fs = std::filesystem;
         }
 
         //cut out symlink files
-        if (fs::is_regular_file(path)) {
+        if (fs::is_regular_file(Entity.path())) {
 
           //if current file has accepted extension, append the contents to the merged.txt file
-          if (acceptedExtensions.contains(path.extension().string())) {
+          if (acceptedExtensions.contains(Entity.path().extension().string())) {
 
             //open the found .txt file
-            std::ifstream target(path);
+            std::ifstream target(Entity.path());
             
             
             files_ranges.push_back({ line_number }); // creates a new instance in the vector where 1 file begins.
