@@ -21,10 +21,8 @@ namespace fs = std::filesystem;
   Traverser::Traverser() {
     //create the root path
     fs::create_directory(Program_Output);
-
-    startingPath = fs::current_path();
-    OutputPath = startingPath / Program_Output / OutputFileName;
-    //merge.txt | append mode
+    
+    Output_file_location = fs::current_path() / Program_Output / OutputFileName;    
     
     //starting directory
     seenDirectories.push_back(fs::current_path());
@@ -32,8 +30,9 @@ namespace fs = std::filesystem;
   
   //Splits the merged file into chunks, each of size maximum_file_size
   bool Traverser::split(std::vector<std::vector<std::uint64_t>>& file_ranges) {
+
     //if the merged file is too big, check if the user wants to split it.
-    auto merged_file_size = fs::file_size(OutputPath);
+    auto merged_file_size = fs::file_size(Output_file_location);
     if (merged_file_size >= maximum_file_length) {
       char user_choise = 'N'; // default is no.
       std::cout << "\n\n------------CAUTION!------------" << std::endl;
@@ -57,10 +56,28 @@ namespace fs = std::filesystem;
       //if user choise is 'N'
       //skip because it will evaluate to true anyways.
 
-      //if user choice is 'Y'
+      //if users choice is 'Y'
       if (user_choise == 'Y') {
 
+        // since this place is ran once during the program, it wont have to be efficient.
 
+        const fs::path output_dir = startingPath / Program_Output;
+        const fs::path separated_dir = output_dir / "separated";
+        fs::create_directory(separated_dir);
+
+        const std::string base_filename = "split";
+        std::uint64_t line_number = 0;
+        std::uint64_t file_count = 0;
+
+        std::ifstream merged_file(Output_file_location);
+
+        // Use a helper to construct full split path
+        auto split_path = separated_dir / (base_filename + std::to_string(file_count));
+        std::ifstream split_file(split_path);
+
+        // go to the line number given in file_ranges
+        // if the amount of lines does not go over the maximum file length keep appending.
+        // else close the old split file, create a new split file, reset line number, add 1 to file count and keep appending to the new split
 
 
 
@@ -76,7 +93,7 @@ namespace fs = std::filesystem;
     std::vector<std::vector<std::uint64_t>> files_ranges{}; // hold the start and end positions of each file that is appended to the merge.
     std::uint64_t line_number = 0ULL; // holds the line number in the append file
     //open the created file.
-    output.open(OutputPath, std::ios::app);
+    output.open(Output_file_location, std::ios::app);
     //searches and combines files into one speficied file.
     //continues when there are no other directories to be seen
     while (!seenDirectories.empty()) {
