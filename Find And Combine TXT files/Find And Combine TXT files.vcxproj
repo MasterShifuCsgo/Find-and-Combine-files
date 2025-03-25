@@ -131,7 +131,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Find And Combine TXT files.cpp" />
-    <ClCompile Include="GlobalFunctions.cpp" />
     <ClCompile Include="Traverser.cpp" />
   </ItemGroup>
   <ItemGroup>
