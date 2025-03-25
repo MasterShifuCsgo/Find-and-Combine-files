@@ -10,16 +10,17 @@
 
 namespace fs = std::filesystem;
 
-constexpr const char* Program_Output("root"); //folder
+constexpr const char* Program_Output("root"); // folder where all the programs outputs will go to.
 constexpr const char* extension(".txt");
 constexpr const char* fileName("merged");
-constexpr const uint32_t maximum_file_length = 500'000;
+constexpr const uint32_t maximum_file_length = 500'000; // x amount maximum lines
+fs::path split_files; // location of the merge.txt file but split
 
 class Traverser {
 
   const std::string OutputFileName = std::string(fileName) + extension;
 
-  fs::path OutputPath;
+  fs::path Output_file_location;
   fs::path startingPath;
   std::ofstream output;
   std::vector<fs::path> seenDirectories;
