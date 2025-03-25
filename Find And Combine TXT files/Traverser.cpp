@@ -37,11 +37,11 @@ namespace fs = std::filesystem;
 
       //ask the user if he wants to split the file into multiple parts  
         while (true) {
-          if (!GlobalFunctions::readUserInput(user_choise, std::string("Please enter a char"))) {
+          if (!GlobalFunctions::readUserInput<char>(user_choise, std::string("Please enter a char"))) {
             std::cout << "\'Y\' or \'N\': " << std::flush;
             continue;
           }          
-          if (!GlobalFunctions::isValidChoice(user_choise, { 'Y', 'N' }, std::string("Please enter the right choice"))){
+          if (!GlobalFunctions::isValidChoice<char>(user_choise, { 'Y', 'N' }, std::string("Please enter the right choice"))){
             std::cout << "\'Y\' or \'N\': " << std::flush;
             continue;
           }
@@ -80,7 +80,6 @@ namespace fs = std::filesystem;
       fs::path currentFolder = seenDirectories.back();
       seenDirectories.pop_back();
       
-
       fs::path startingDir = (startingPath / Program_Output);
 
       //start looking for files in the directory
@@ -102,8 +101,7 @@ namespace fs = std::filesystem;
 
             //open the found .txt file
             std::ifstream target(Entity.path());
-            
-            
+                        
             files_ranges.push_back({ line_number }); // creates a new instance in the vector where 1 file begins.
             output << '\'' << filename << '\'' << '\n';            
             std::string line;

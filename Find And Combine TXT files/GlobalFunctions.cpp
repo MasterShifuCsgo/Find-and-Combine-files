@@ -6,7 +6,7 @@
 
 
 template<typename T>
-bool readUserInput(T& user_choice, const std::string& message_when_failed) {
+bool GlobalFunctions::readUserInput(T& user_choice, const std::string message_when_failed) {
   std::cin >> user_choice;
 
   if (std::cin.fail()) {
@@ -22,7 +22,7 @@ bool readUserInput(T& user_choice, const std::string& message_when_failed) {
 }
 
 template<typename T>
-bool isValidChoice(const T& user_choice, const std::vector<T>& valid_choices, const std::string& message_when_failed) {
+bool GlobalFunctions::isValidChoice(const T& user_choice, const std::vector<T> valid_choices, const std::string message_when_failed) {
   for (const T& choice : valid_choices) {
     if (user_choice == choice) {
       return true;

@@ -10,12 +10,12 @@ namespace GlobalFunctions {
   // prints `message_when_failed`, clears the error, and returns false.
   // Otherwise, returns true.
   template<typename T>
-  bool readUserInput(T& user_choice, std::string message_when_failed);
+  extern bool readUserInput(T& user_choice, const std::string message_when_failed);
 
   // Validates if `user_choice` is in the `valid_choices` list.
   // If not, prints `message_when_failed` and returns false.
   // Otherwise, returns true.
   template<typename T>
-  bool isValidChoice(T& user_choice, std::vector<T> valid_choices, std::string message_when_failed);
+  extern bool isValidChoice(const T& user_choice, const std::vector<T> valid_choices, const std::string message_when_failed);
  
 }
