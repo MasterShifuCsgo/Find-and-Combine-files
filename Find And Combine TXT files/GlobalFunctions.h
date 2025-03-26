@@ -5,18 +5,25 @@
 
 namespace GlobalFunctions {
 
-
-
-  inline void log(std::string message) {
-    std::cout << message << '\n';
+#if defined(_DEBUG) || defined(DEBUG)
+  inline void log(const std::string& message = "", const std::string& type = "") {
+    if (type == "") {
+      std::cout << message << std::endl;
+    }
+    else {
+      std::cout << type << ':' << message << std::endl;
+    }
   }
+#else
+  inline void log(const std::string& message = "", const std::string& type = "") {}
+#endif
 
   // Attempts to read input into `user_choice`. 
   // If the input stream is in a failed state (e.g., invalid type),
   // prints `message_when_failed`, clears the error, and returns false.
   // Otherwise, returns true.
   template<typename T>
-  extern bool readUserInput(T& user_choice, const std::string message_when_failed) {
+  bool readUserInput(T& user_choice, const std::string message_when_failed) {
     std::cin >> user_choice;
     if (std::cin.fail()) {
       std::cin.clear(); // Reset error state
@@ -33,7 +40,7 @@ namespace GlobalFunctions {
   // If not, prints `message_when_failed` and returns false.
   // Otherwise, returns true.
   template<typename T>
-  extern bool isValidChoice(const T& user_choice, const std::vector<T> valid_choices, const std::string message_when_failed) {
+  bool isValidChoice(const T& user_choice, const std::vector<T>& valid_choices, const std::string message_when_failed) {
     for (const T& choice : valid_choices) {
       if (user_choice == choice) {
         return true;
