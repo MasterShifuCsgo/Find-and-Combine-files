@@ -5,6 +5,12 @@
 
 namespace GlobalFunctions {
 
+
+
+  inline void log(std::string message) {
+    std::cout << message << '\n';
+  }
+
   // Attempts to read input into `user_choice`. 
   // If the input stream is in a failed state (e.g., invalid type),
   // prints `message_when_failed`, clears the error, and returns false.
@@ -38,4 +44,6 @@ namespace GlobalFunctions {
     return false;
   };
  
+
+
 }

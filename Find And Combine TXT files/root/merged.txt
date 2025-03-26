@@ -18,22 +18,71 @@ int main()
 {
   
   Traverser tr;
-
   if (tr.combine()) {
-    std::cout << "Complete";
+    std::cout << "\n\nFinished\n\n" << std::endl;
   }
 
-
-
-
   
+
+
   _getch();
 
   return 0;
 }
 
 
+'GlobalFunctions.cpp'
+#include "GlobalFunctions.h"
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <string>
 
+
+
+
+'GlobalFunctions.h'
+#pragma once
+
+#include <string>
+#include <vector>
+
+namespace GlobalFunctions {
+
+  // Attempts to read input into `user_choice`. 
+  // If the input stream is in a failed state (e.g., invalid type),
+  // prints `message_when_failed`, clears the error, and returns false.
+  // Otherwise, returns true.
+  template<typename T>
+  extern bool readUserInput(T& user_choice, const std::string message_when_failed) {
+    std::cin >> user_choice;
+    if (std::cin.fail()) {
+      std::cin.clear(); // Reset error state
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard invalid input
+      std::cout << "\nInvalid Choice!\n";
+      std::cout << message_when_failed << '\n';
+      return false;
+    }
+
+    return true;
+  }
+
+  // Validates if `user_choice` is in the `valid_choices` list.
+  // If not, prints `message_when_failed` and returns false.
+  // Otherwise, returns true.
+  template<typename T>
+  extern bool isValidChoice(const T& user_choice, const std::vector<T> valid_choices, const std::string message_when_failed) {
+    for (const T& choice : valid_choices) {
+      if (user_choice == choice) {
+        return true;
+      }
+    }
+
+    std::cout << message_when_failed << '\n';
+    return false;
+  };
+ 
+}
 
 'Traverser.cpp'
 #pragma once
@@ -45,73 +94,158 @@ int main()
 #include <unordered_set>
 #include <iostream>
 #include <fstream>
+#include <cstdint> 
 #include "Traverser.h"
-
+#include "GlobalFunctions.h"
 
 namespace fs = std::filesystem;
-
-//logs data to the terminal
-#ifdef DEBUG
-void msgTerminal(std::string type, std::string msg) {
-  std::cout << type << ": " << msg << "\n";
-}
-#else
-inline void msgTerminal(std::string, std::string) {}
-#endif
 
   Traverser::Traverser() {
     //create the root path
     fs::create_directory(Program_Output);
-
-    startingPath = fs::current_path();
-    OutputPath = startingPath / Program_Output / OutputFileName;
-    //merge.txt | append mode
-    output.open(OutputPath, std::ios::app);
-    //directorys found
+    
+    Output_file_location = fs::current_path() / Program_Output / OutputFileName;    
+    
+    //starting directory
     seenDirectories.push_back(fs::current_path());
   }
+  
+  //Splits the merged file into chunks, each of size maximum_file_size
+  bool Traverser::split(std::vector<std::vector<std::uint64_t>>& file_ranges) {
+
+    //if the merged file is too big, check if the user wants to split it.
+    auto merged_file_size = fs::file_size(Output_file_location);
+    if (merged_file_size >= maximum_file_length) {
+      char user_choise = 'N'; // default is no.
+      std::cout << "\n\n------------CAUTION!------------" << std::endl;
+      std::cout << "Merged file is more than maximum file length: " << maximum_file_length << std::endl;
+      std::cout << "Would you like to seperate the file into chucks of " << maximum_file_length << "?" << std::endl;
+
+      //ask the user if he wants to split the file into multiple parts  
+        while (true) {
+          if (!GlobalFunctions::readUserInput<char>(user_choise, std::string("Please enter a char"))) {
+            std::cout << "\'Y\' or \'N\': " << std::flush;
+            continue;
+          }          
+          if (!GlobalFunctions::isValidChoice<char>(user_choise, { 'Y', 'N' }, std::string("Please enter the right choice"))){
+            std::cout << "\'Y\' or \'N\': " << std::flush;
+            continue;
+          }
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          break; // all tests passed.
+        }
+
+      //if user choise is 'N'
+      //skip because it will evaluate to true anyways.
+
+      //if users choice is 'Y'
+      if (user_choise == 'Y') {
+
+        // since this place is ran once during the program, it wont have to be efficient.
+
+        const fs::path output_dir = startingPath / Program_Output;
+        const fs::path separated_dir = output_dir / "separated";
+        fs::create_directory(separated_dir);
+
+        const std::string base_filename = "split";
+        std::uint64_t line_number = 0;
+        std::uint64_t file_count = 0;
+
+        std::ifstream merged_file(Output_file_location);
+
+        // Use a helper to construct full split path
+        auto split_path = separated_dir / (base_filename + std::to_string(file_count));
+        std::ofstream split_file(split_path, std::ios::app);
+
+        // end of the file - start of the file + last file length > maximum 
+        // if the amount of lines + last file lines does not go over the maximum file length, keep appending.
+        // else close the old split file, create a new split file, reset line number, add 1 to file count and keep appending to the new split
+
+        uint32_t appended_file_lengths = 0;
+        uint64_t file_line_amount = 0;
+        for (int i = 0; i < file_ranges.size(); ++i) {
+          file_line_amount = file_ranges[i][1] - file_ranges[i][0];
+          if (file_line_amount + appended_file_lengths < maximum_file_length) {
+            //add the file lines to the split file. and add the lenth to the appended_file_length
+            uint64_t file_start = file_ranges[i][0];
+            uint64_t file_end = file_ranges[i][1];
+            
+            std::string line;
+            //skip lines until in the right line
+            for (int skip = 0; skip < file_start && std::getline(merged_file, line); ++skip) {
+              //std::getline(merged_file, line); // only way to get the line 43 is to go through 42 lines before it.
+            }
+
+            //start appending the lines to the split file
+            for (int i = file_start; i < file_end && std::getline(merged_file, line); ++i) {              
+              split_file << line; // add the line;
+            }
+            appended_file_lengths += file_line_amount;
+          }
+          else {
+            //add 1 to file_count, create new split file and replace it with the old one, reset the last_file_length variable.
+            ++file_count;
+            split_file.flush();
+            split_file.close();
+            split_file.open(separated_dir / (base_filename + std::to_string(file_count)), std::ios::out); // open the new file.
+            appended_file_lengths = 0;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
 
   bool Traverser::combine() {
 
+    std::vector<std::vector<std::uint64_t>> files_ranges{}; // hold the start and end positions of each file that is appended to the merge.
+    std::uint64_t line_number = 0ULL; // holds the line number in the append file
+    //open the created file.
+    output.open(Output_file_location, std::ios::app);
+    //searches and combines files into one speficied file.
     //continues when there are no other directories to be seen
     while (!seenDirectories.empty()) {
       
       //change directory
       fs::path currentFolder = seenDirectories.back();
       seenDirectories.pop_back();
-      msgTerminal("LOG:", "Directory Changed: " + currentFolder.string().substr(startingPath.string().size()));
+      
       fs::path startingDir = (startingPath / Program_Output);
 
       //start looking for files in the directory
       for (const auto& Entity : fs::directory_iterator(currentFolder)) {
-
-        const auto path = Entity.path();
+       
         const auto filename = Entity.path().filename().string();
 
         // check if the file is the folder stared
-        if (Entity.path() == startingDir) {
-          continue; // skip that folder
+        
+        if (fs::equivalent(Entity.path(), startingDir)) {
+          continue; // skips that folder
         }
 
         //cut out symlink files
-        if (fs::is_regular_file(path)) {
+        if (fs::is_regular_file(Entity.path())) {
 
           //if current file has accepted extension, append the contents to the merged.txt file
-          if (acceptedExtensions.contains(path.extension().string())) {
+          if (acceptedExtensions.contains(Entity.path().extension().string())) {
 
             //open the found .txt file
-            std::ifstream target(path);
-
-            //append the text from the file into the main text file                    
-            
-            msgTerminal("LOG: ", "File found: " + filename);
-
-            output << '\'' << filename << '\'' << '\n';
+            std::ifstream target(Entity.path());
+                        
+            files_ranges.push_back({ line_number }); // creates a new instance in the vector where 1 file begins.
+            output << '\'' << filename << '\'' << '\n';            
             std::string line;
+
+            //append the text from the file into the main text file
             while (std::getline(target, line)) {
+              ++line_number; // lines from files
               output << line << '\n';
             }
-            output << "\n\n\n";
+
+            output << "\n";
+            line_number++; // last '\n'
+            files_ranges.push_back(files_ranges[files_ranges.size()-1]); // adds the file end to the latest file position added.
             target.close();
           }
         }
@@ -122,12 +256,12 @@ inline void msgTerminal(std::string, std::string) {}
         }
       }
     }
-    output.flush();
-
+    output.flush(); // get rid of any leftovers in buffer
+    output.close(); 
+    split(files_ranges); // ask the user if the wants to split the file if the file is too big. size is determined by variable 'maximum_file_length'
     return true;
   }
-
-
+    
 
 
 'Traverser.h'
@@ -139,18 +273,20 @@ inline void msgTerminal(std::string, std::string) {}
 #include <unordered_set>
 #include <iostream>
 #include <fstream>
+#include <cstdint>
 
 namespace fs = std::filesystem;
 
-constexpr const char* Program_Output("root"); //folder
+constexpr const char* Program_Output("root"); // folder where all the programs outputs will go to.
 constexpr const char* extension(".txt");
 constexpr const char* fileName("merged");
+constexpr const uint32_t maximum_file_length = 500'000; // x amount maximum lines
 
 class Traverser {
 
   const std::string OutputFileName = std::string(fileName) + extension;
 
-  fs::path OutputPath;
+  fs::path Output_file_location;
   fs::path startingPath;
   std::ofstream output;
   std::vector<fs::path> seenDirectories;
@@ -205,29 +341,23 @@ class Traverser {
 public:
   Traverser();
   bool combine();
+  bool split(std::vector<std::vector<std::uint64_t>>& file_ranges);
 
 };
 
 
 
-
-
 'Find And Combine TXT files.log'
-﻿  Traverser.cpp
-  Generating code
-  29 of 777 functions ( 3.7%) were compiled, the rest were copied from previous compilation.
-    8 functions were new in current compilation
-    112 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  Find And Combine TXT files.vcxproj -> C:\Users\kaspar\source\repos\Find And Combine TXT files\x64\Release\Find And Combine TXT files.exe
-
-
-
-'Find And Combine TXT files.log'
-﻿  Find And Combine TXT files.cpp
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: The intermediate directory (x64\Release\) contains files shared from another project (Find And Combine TXT files.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   Traverser.cpp
-  Generating Code...
+  Generating code
+  2 of 777 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  Find And Combine TXT files.vcxproj -> C:\Users\kaspar\source\repos\Find And Combine TXT files\x64\Release\Combine Files.exe
+
+'Find And Combine TXT files.log'
+﻿  LINK : C:\Users\kaspar\source\repos\Find And Combine TXT files\x64\Debug\Find And Combine TXT files.exe not found or not built by the last incremental link; performing full link
   Find And Combine TXT files.vcxproj -> C:\Users\kaspar\source\repos\Find And Combine TXT files\x64\Debug\Find And Combine TXT files.exe
-
-
 

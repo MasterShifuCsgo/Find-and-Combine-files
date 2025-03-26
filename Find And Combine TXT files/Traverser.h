@@ -14,7 +14,6 @@ constexpr const char* Program_Output("root"); // folder where all the programs o
 constexpr const char* extension(".txt");
 constexpr const char* fileName("merged");
 constexpr const uint32_t maximum_file_length = 500'000; // x amount maximum lines
-fs::path split_files; // location of the merge.txt file but split
 
 class Traverser {
 
@@ -25,12 +24,12 @@ class Traverser {
   std::ofstream output;
   std::vector<fs::path> seenDirectories;
   
-  std::unordered_set<std::string> acceptedExtensions2{
+  std::unordered_set<std::string> acceptedExtensions{
     ".txt",
     ".md"
   };
 
-  std::unordered_set<std::string> acceptedExtensions{
+  std::unordered_set<std::string> acceptedExtensions2{
     ".txt",   // Plain text file
     ".md",    // Markdown file
     ".pdf",   // Portable Document Format
