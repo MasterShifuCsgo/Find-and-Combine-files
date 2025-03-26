@@ -13,6 +13,8 @@
 
 namespace fs = std::filesystem;
 
+
+
   Traverser::Traverser() {
     //create the root path
     fs::create_directory(Program_Output);
@@ -68,20 +70,57 @@ namespace fs = std::filesystem;
 
         // Use a helper to construct full split path
         auto split_path = separated_dir / (base_filename + std::to_string(file_count));
-        std::ifstream split_file(split_path);
+        std::ofstream split_file(split_path, std::ios::out); // out should be used when creating a new file.
 
-        // go to the line number given in file_ranges
-        // if the amount of lines does not go over the maximum file length keep appending.
+        // end of the file - start of the file + last file length > maximum 
+        // if the amount of lines + last file lines does not go over the maximum file length, keep appending.
         // else close the old split file, create a new split file, reset line number, add 1 to file count and keep appending to the new split
 
+        uint32_t appended_file_lengths = 0;
+        uint64_t file_line_amount = 0;
+        
+        if (!merged_file.is_open()) {
+          std::cerr << "\nFailed to open merge.txt file\n";
+          std::abort();
+        }
 
+        if (!split_file.is_open()) {
+          std::cerr << "\nFailed to create or open split_file\n";
+          std::abort();
+        }
 
+        for (int i = 0; i < file_ranges.size(); ++i) {
+          file_line_amount = file_ranges[i][1] - file_ranges[i][0];
+          if (file_line_amount + appended_file_lengths < maximum_file_length) {
+            //add the file lines to the split file. and add the lenth to the appended_file_length
+            uint64_t file_start = file_ranges[i][0];
+            uint64_t file_end = file_ranges[i][1];
+            
+            std::string line;
+            //skip lines until in the right line
+            for (int skip = 0; skip < file_start && std::getline(merged_file, line); ++skip) {
+              //std::getline(merged_file, line); // only way to get the line 43 is to go through 42 lines before it.
+            }
 
+            //start appending the lines to the split file
+            for (int i = file_start; i < file_end && std::getline(merged_file, line); ++i) {              
+              split_file << line; // add the line;
+            }
+            appended_file_lengths += file_line_amount;
+          }
+          else {
+            //add 1 to file_count, create new split file and replace it with the old one, reset the last_file_length variable.
+            ++file_count;
+            split_file.flush();
+            split_file.close();
+            split_file.open(separated_dir / (base_filename + std::to_string(file_count)), std::ios::out); // open the new file.
+            appended_file_lengths = 0;
+          }
+        }
       }
     }
     return true;
   }
-
 
   bool Traverser::combine() {
 
@@ -118,21 +157,23 @@ namespace fs = std::filesystem;
 
             //open the found .txt file
             std::ifstream target(Entity.path());
-                        
-            files_ranges.push_back({ line_number }); // creates a new instance in the vector where 1 file begins.
-            output << '\'' << filename << '\'' << '\n';            
-            std::string line;
+            if (target.is_open()) {
 
-            //append the text from the file into the main text file
-            while (std::getline(target, line)) {
-              ++line_number; // lines from files
-              output << line << '\n';
+              files_ranges.push_back({ line_number }); // creates a new instance in the vector where 1 file begins.
+              output << '\'' << filename << '\'' << '\n';
+              std::string line;
+
+              //append the text from the file into the main text file
+              while (std::getline(target, line)) {
+                ++line_number; // lines from files
+                output << line << '\n';
+              }
+
+              output << "\n";
+              line_number++; // last '\n'
+              files_ranges.push_back(files_ranges[files_ranges.size() - 1]); // adds the file end to the latest file position added.
+              target.close();
             }
-
-            output << "\n";
-            line_number++; // last '\n'
-            files_ranges.push_back(files_ranges[files_ranges.size()-1]); // adds the file end to the latest file position added.
-            target.close();
           }
         }
 
