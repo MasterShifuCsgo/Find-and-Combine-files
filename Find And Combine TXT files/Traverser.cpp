@@ -29,12 +29,12 @@ namespace fs = std::filesystem;
 
     //if the merged file is too big, check if the user wants to split it.
     auto merged_file_size = fs::file_size(Output_file_location);
-    if (merged_file_size >= maximum_file_length) {
+    if (merged_file_size >= maximum_file_rows) {
       char user_choise = 'N'; // default is no.
       std::cout << "\n\n------------CAUTION!------------" << std::endl;
-      std::cout << "Merged file is more than maximum file length: " << maximum_file_length << std::endl;
-      std::cout << "Would you like to seperate the file into chucks of " << maximum_file_length << "?" << std::endl;
-
+      std::cout << "Merged file is more than maximum file length: " << maximum_file_rows << std::endl;
+      std::cout << "Would you like to seperate the file into chucks of " << maximum_file_rows << "?" << std::endl;
+      std::cout << "\'Y\' or \'N\': " << std::flush;
       //ask the user if he wants to split the file into multiple parts  
         while (true) {
           if (!GlobalFunctions::readUserInput<char>(user_choise, std::string("Please enter a char"))) {
@@ -45,7 +45,7 @@ namespace fs = std::filesystem;
             std::cout << "\'Y\' or \'N\': " << std::flush;
             continue;
           }
-          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); //clear latest enterd data in buffer for the next cin, if it ever comes.
           break; // all tests passed.
         }
 
@@ -89,6 +89,7 @@ namespace fs = std::filesystem;
         }
 
         for (int i = 0; i < file_ranges.size(); ++i) {
+          
           //check file position vector
           if (file_ranges[i].size() != 2) {
             GlobalFunctions::log("ERROR", "nonvalid file range found.");
@@ -99,29 +100,39 @@ namespace fs = std::filesystem;
           }
           
           file_line_amount = file_ranges[i][1] - file_ranges[i][0];
-          if (file_line_amount + appended_file_lengths < maximum_file_length) {
+          if (file_line_amount + appended_file_lengths < maximum_file_rows) {
             //add the file lines to the split file. and add the lenth to the appended_file_length
             uint64_t file_start = file_ranges[i][0];
             uint64_t file_end = file_ranges[i][1];
             
+
+            GlobalFunctions::log("Skipping files", "Action");
             std::string line;
             //skip lines until in the right line
             for (int skip = 0; skip < file_start && std::getline(merged_file, line); ++skip) {
-              //std::getline(merged_file, line); // only way to get the line 43 is to go through 42 lines before it.
+             // only way to get to line 43 is to go through 42 lines before it.
+              
             }
-
+            GlobalFunctions::log("adding lines", "Action");
+            
             //start appending the lines to the split file
             for (uint64_t i = file_start; i < file_end && std::getline(merged_file, line); ++i) {
               split_file << line; // add the line;
-            }
+            }            
             appended_file_lengths += file_line_amount;
           }
           else {
+            GlobalFunctions::log("in else block", "FILE");
             //add 1 to file_count, create new split file and replace it with the old one, reset the last_file_length variable.
             ++file_count;
             split_file.flush();
-            split_file.close();
-            split_file.open(separated_dir / (base_filename + std::to_string(file_count)), std::ios::out); // open the new file.
+            split_file.close();            
+            split_file.open(separated_dir / (base_filename + std::to_string(file_count)+ ".txt"), std::ios::out); // open the new file.
+            if (!split_file.is_open()) {
+              std::cerr << "\nsplit_file opening failed.\n";
+            }
+
+
             appended_file_lengths = 0;
           }
         }
@@ -152,9 +163,7 @@ namespace fs = std::filesystem;
       seenDirectories.pop_back();
       GlobalFunctions::log("Now processing: " + currentFolder.string(), "DEBUG");
 
-      fs::path startingDir = (startingPath / Program_Output);
-
-      
+      fs::path startingDir = (startingPath / Program_Output);      
 
       try {
         //start looking for files in the directory
