@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 constexpr const char* Program_Output("root"); // folder where all the programs outputs will go to.
 constexpr const char* extension(".txt");
 constexpr const char* fileName("merged");
-constexpr const uint32_t maximum_file_length = 500'000; // x amount maximum lines
+constexpr const uint32_t maximum_file_rows = 500; // x amount maximum lines
 
 class Traverser {
 
@@ -26,7 +26,8 @@ class Traverser {
   
   std::unordered_set<std::string> acceptedExtensions{
     ".txt",
-    ".md"
+    ".md",
+    ".pdf"
   };
 
   std::unordered_set<std::string> acceptedExtensions2{
