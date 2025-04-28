@@ -46,7 +46,7 @@ namespace fs = std::filesystem;
             std::cout << "\'Y\' or \'N\': " << std::flush;
             continue;
           }          
-          if (!GlobalFunctions::isValidChoice<char>(user_choise, { 'Y', 'N' }, std::string("Please enter the right choice"))){
+          if (!GlobalFunctions::isValidChoice<char>(user_choise, { 'Y', 'N', 'y', 'n'}, std::string("Please enter the right choice"))) {
             std::cout << "\'Y\' or \'N\': " << std::flush;
             continue;
           }
