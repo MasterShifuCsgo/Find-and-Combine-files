@@ -30,7 +30,7 @@ namespace fs = std::filesystem;
   }
   
   //Splits the merged file into chunks, each of size maximum_file_size
-  bool Traverser::split(std::vector<std::vector<std::uint64_t>>& file_ranges) {
+  bool Traverser::split(std::vector<std::vector<std::uint64_t>>& file_ranges) const {
 
     //if the merged file is too big, check if the user wants to split it.
     auto merged_file_size = fs::file_size(Output_file_location);
@@ -200,7 +200,12 @@ namespace fs = std::filesystem;
               if (target.is_open()) {
                 GlobalFunctions::log("ACTION", std::string("Treating target.txt: " + Entity.path().string()));
                 std::vector<uint64_t> file_range = { line_number };
-                output << '\'' << filename << '\'' << '\n';
+
+                //get the file last write time
+                auto last_write_time = fs::last_write_time(Entity.path());
+
+                output << "Filename: \'" << filename << '\'' << '\n';
+                output << "last write time: \'" << last_write_time << '\n';
                 std::string line;
 
                 //append the text from the file into the main text file

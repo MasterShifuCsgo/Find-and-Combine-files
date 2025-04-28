@@ -75,7 +75,7 @@ class Traverser {
 public:
   Traverser();
   bool combine();
-  bool split(std::vector<std::vector<std::uint64_t>>& file_ranges);
+  bool split(std::vector<std::vector<std::uint64_t>>& file_ranges) const;
 
 };
 
