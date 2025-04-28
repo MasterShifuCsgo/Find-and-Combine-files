@@ -76,7 +76,7 @@ public:
   Traverser();
   bool combine();
   bool split(std::vector<std::vector<std::uint64_t>>& file_ranges) const;
-
+  bool clean_merged_file();
 };
 
 

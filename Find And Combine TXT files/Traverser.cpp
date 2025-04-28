@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <unordered_set>
 #include <iostream>
 #include <fstream>
 #include <cstdint> 
@@ -255,4 +254,11 @@ namespace fs = std::filesystem;
     return true;
   }
     
+  bool Traverser::clean_merged_file() {
+     
+    //loops through the merged.txt file to clean newlines.
 
+    // when there is more than 4 consequtive newlines start deleting newlines until you reach a letter.
+     
+  
+  }
